@@ -15,4 +15,4 @@ I want to build a dashboard that lets me create, manage, and delete monitors whi
 
 backend: CRUD interface for page monitor objects, refactor current code
 
-next will be frontend/deployment
+next will be frontend/deployment tweaks
