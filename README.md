@@ -20,8 +20,8 @@ next will be frontend/deployment tweaks
 
 ### to run
 ```sh
-go build
-./page_monitor_hub
+go build -o bin
+./bin/page_monitor_hub
 
 ```
 
@@ -43,7 +43,5 @@ endpoints:
         "redis_channel":"purdue_monitor",
         "refresh_rate":5,
     }
-
-
 }
 ```

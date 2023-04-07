@@ -3,7 +3,6 @@ package hub
 import (
 	"context"
 	"fmt"
-	"log"
 	"page_monitor_hub/pkg/pagerefresh"
 
 	"github.com/redis/go-redis/v9"
@@ -36,9 +35,9 @@ func NewPageMonitorRequest(page_url string, redis_channel string, refresh_rate i
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		})
-		if err := rdb.Ping(ctx); err != nil {
-			println("You need to connect to redis lil bro. get a redis running with no pw on localhost:6379")
-			log.Fatal(err)
+		_, err := rdb.Ping(ctx).Result()
+		if err != nil {
+			panic("wheeeee no redis you loser")
 		}
 		refresher.WatchForChangesAndNotify(ctx, rdb, refresh_rate, &testTomb)
 		println("Finished that mafucka")
