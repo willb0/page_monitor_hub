@@ -3,31 +3,32 @@ package hub
 import (
 	"context"
 	"fmt"
-	"page_monitor/pkg/pagerefresh"
+	"log"
+	"page_monitor_hub/pkg/pagerefresh"
 
 	"github.com/redis/go-redis/v9"
 	"gopkg.in/tomb.v1"
 )
 
 
-type PageRefreshHub struct {
-	channels map[string](*PageRefreshRequest)
+type PageMonitorHub struct {
+	channels map[string](*PageMonitorRequest)
 }
-type PageRefreshRequest struct {
+type PageMonitorRequest struct {
 	url           string
 	testtomb      *tomb.Tomb
 	redis_channel string
-	refresher     pagerefresh.PageRefresher
+	refresher     pagerefresh.PageMonitor
 }
 
-func (p *PageRefreshRequest) GetUrl() string{
+func (p *PageMonitorRequest) GetUrl() string{
 	return p.url
 }
 
-func NewPageRefreshRequest(page_url string, redis_channel string, refresh_rate int) *PageRefreshRequest {
+func NewPageMonitorRequest(page_url string, redis_channel string, refresh_rate int) *PageMonitorRequest {
 	testTomb := tomb.Tomb{}
 	ctx, cancel := context.WithCancel(context.Background())
-	refresher := pagerefresh.NewPageRefresher(page_url, redis_channel)
+	refresher := pagerefresh.NewPageMonitor(page_url, redis_channel)
 	go func() {
 		defer testTomb.Done()
 		rdb := redis.NewClient(&redis.Options{
@@ -35,11 +36,15 @@ func NewPageRefreshRequest(page_url string, redis_channel string, refresh_rate i
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		})
+		if err := rdb.Ping(ctx); err != nil {
+			println("You need to connect to redis lil bro. get a redis running with no pw on localhost:6379")
+			log.Fatal(err)
+		}
 		refresher.WatchForChangesAndNotify(ctx, rdb, refresh_rate, &testTomb)
 		println("Finished that mafucka")
 		cancel()
 	}()
-	return &PageRefreshRequest{
+	return &PageMonitorRequest{
 		url:           page_url,
 		testtomb:      &testTomb,
 		redis_channel: redis_channel,
@@ -47,21 +52,21 @@ func NewPageRefreshRequest(page_url string, redis_channel string, refresh_rate i
 	}
 }
 
-func NewPageRefresherHub() *PageRefreshHub {
-	return &PageRefreshHub{
-		channels: make(map[string](*PageRefreshRequest)),
+func NewPageMonitorHub() *PageMonitorHub {
+	return &PageMonitorHub{
+		channels: make(map[string](*PageMonitorRequest)),
 	}
 }
 
-func (p *PageRefreshHub) AddPage(pg *PageRefreshRequest) {
+func (p *PageMonitorHub) AddMonitor(pg *PageMonitorRequest) {
 	p.channels[pg.url] = pg
 }
-func (p *PageRefreshHub) RemovePage(page_url string) {
+func (p *PageMonitorHub) RemoveMonitor(page_url string) {
 	println(p.channels[page_url])
 	p.channels[page_url].testtomb.Kill(fmt.Errorf("death from above"))
 	delete(p.channels, page_url)
 }
 
-func (p *PageRefreshHub) GetMonitors() map[string](*PageRefreshRequest){
+func (p *PageMonitorHub) GetMonitors() map[string](*PageMonitorRequest){
 	return p.channels
 }

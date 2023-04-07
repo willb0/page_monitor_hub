@@ -12,21 +12,21 @@ import (
 	"gopkg.in/tomb.v1"
 )
 
-type PageRefresher struct {
+type PageMonitor struct {
 	page_url        string
 	redis_channel   string
 	current_content []byte
 }
 
-func NewPageRefresher(page_url string, redis_channel string) *PageRefresher {
-	return &PageRefresher{
+func NewPageMonitor(page_url string, redis_channel string) *PageMonitor {
+	return &PageMonitor{
 		page_url:        page_url,
 		redis_channel:   redis_channel,
 		current_content: []byte(page_url),
 	}
 }
 
-func (p *PageRefresher) CheckForChanges() bool {
+func (p *PageMonitor) CheckForChanges() bool {
 	html := p.GetHTML()
 	hasher := sha256.New()
 	hasher.Write([]byte(html))
@@ -39,7 +39,7 @@ func (p *PageRefresher) CheckForChanges() bool {
 	return false
 }
 
-func (p *PageRefresher) GetHTML() []byte {
+func (p *PageMonitor) GetHTML() []byte {
 	resp, err := http.Get(p.page_url)
 
 	if err != nil {
@@ -55,7 +55,7 @@ func (p *PageRefresher) GetHTML() []byte {
 	return html
 }
 
-func (p *PageRefresher) WatchForChangesAndNotify(ctx context.Context, r *redis.Client, refresh_rate int, t *tomb.Tomb) {
+func (p *PageMonitor) WatchForChangesAndNotify(ctx context.Context, r *redis.Client, refresh_rate int, t *tomb.Tomb) {
 	for {
 		select {
 		case <-t.Dying():
