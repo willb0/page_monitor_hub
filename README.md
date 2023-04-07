@@ -1,28 +1,18 @@
-# page_monitor
+# page_monitor_hub
 
-i'm writing this repo in go to monitor websites and send notifications of content change using with redis pub sub
+### context
+this is my work in progress on a REST API to manage a slew of different page monitors
 
-you can run page monitor rn if you run a site on localhost:3000 and have docker:
+I initially started this to set up text notifications when my butchers website updated
 
-```sh
-docker run -p 6379:6379 --name some-redis -d redis
-git clone https://github.com/willb0/page_monitor
-cd page_monitor
-go mod download
-go build
-./page_monitor -url https://localhost:3000 -refresh_rate 5
-```
+After learning some go, and redis pub/sub, I set up a page monitor module which will check for updates in the hashed HTML and publish a message over redis to all subscribers.
 
-now you have a go server watching the webpage, and it will publish any updates with the content on the channel "page_refresh" on redis
+this architecture can be used to build notification clients for any end goal, not just SMS
 
-example connecting
+### this project
 
-```py
-import time,redis
-conn = redis.Redis(host='localhost',port=6379,db=1)
-sub = conn.pubsub()
-sub.subscribe('page_refresh')
-while(True):
-    time.sleep(1)
-    print(sub.get_message())
-```
+I want to build a dashboard that lets me create, manage, and delete monitors while also maybe having some analytics. first part of this is:
+
+backend: CRUD interface for page monitor objects, refactor current code
+
+next will be frontend/deployment
