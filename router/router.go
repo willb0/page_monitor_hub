@@ -15,19 +15,24 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 		context.AbortWithError(http.StatusBadRequest, err)
 		return true
 	}
+	_,ok := pageHub.GetMonitors()[pgj.Url]
+	if !ok {
+		context.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"message": "Aborting a monitor that was never started"})
+		return true
+	}
 	fmt.Println(pgj)
 	pageHub.RemoveMonitor(pgj.Url)
 	return false
 }
 
 func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
-	for key, element := range pageHub.GetMonitors() {
-		fmt.Println("k:", key, "=>", "v:", element.GetUrl())
+	keys := make([]string, len(pageHub.GetMonitors()))
+	i := 0;
+	for key := range pageHub.GetMonitors() {
+		keys[i] = key
+		i++
 	}
-	context.JSON(http.StatusAccepted, &models.PageRequestJson{
-		Url:          "a",
-		RedisChannel: "b",
-	})
+	context.JSON(http.StatusAccepted,keys)
 }
 
 func StartMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
@@ -47,7 +52,6 @@ func StopAllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) boo
 	for key, _ := range pageHub.GetMonitors() {
 		pageHub.RemoveMonitor(key)
 	}
-
 	return false
 
 }

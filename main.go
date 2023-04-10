@@ -10,6 +10,11 @@ import (
 
 
 func main() {
+	r := setupRouter()
+	r.Run(":3001")
+}
+
+func setupRouter() *gin.Engine {
 	pageHub := hub.NewPageMonitorHub()
 	r := gin.Default()
 	r.POST("/add_page_monitor", func(context *gin.Context) {
@@ -21,7 +26,10 @@ func main() {
 	r.POST("/stop_page_monitor", func(context *gin.Context) {
 		router.StopMonitorRoute(context, pageHub)
 	})
-	r.Run(":3000")
+	r.GET("/stop_all_monitors", func(context *gin.Context) {
+		router.StopAllMonitorsRoute(context, pageHub)
+	})
+	return r
 }
 
 
