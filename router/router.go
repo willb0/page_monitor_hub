@@ -22,7 +22,9 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	}
 	fmt.Println(pgj)
 	pageHub.RemoveMonitor(pgj.Url)
+	context.JSON(200,pgj)
 	return false
+	
 }
 
 func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
@@ -32,7 +34,7 @@ func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
 		keys[i] = key
 		i++
 	}
-	context.JSON(http.StatusAccepted,keys)
+	context.JSON(200,keys)
 }
 
 func StartMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
@@ -52,6 +54,7 @@ func StopAllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) boo
 	for key, _ := range pageHub.GetMonitors() {
 		pageHub.RemoveMonitor(key)
 	}
+	context.Writer.WriteHeader(200)
 	return false
 
 }
