@@ -21,7 +21,6 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 		return true
 	}
 	fmt.Println(pgj)
-
 	pageHub.RemoveMonitor(pgj.Url)
 	return false
 }
