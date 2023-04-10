@@ -10,12 +10,12 @@ import (
 
 
 func main() {
-	r := setupRouter()
+	pageHub := hub.NewPageMonitorHub()
+	r := setupRouter(pageHub)
 	r.Run(":3001")
 }
 
-func setupRouter() *gin.Engine {
-	pageHub := hub.NewPageMonitorHub()
+func setupRouter(pageHub *hub.PageMonitorHub) *gin.Engine {
 	r := gin.Default()
 	r.POST("/add_page_monitor", func(context *gin.Context) {
 		router.StartMonitorRoute(context, pageHub)
