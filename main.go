@@ -21,7 +21,10 @@ func main() {
 	r.POST("/stop_page_monitor", func(context *gin.Context) {
 		router.StopMonitorRoute(context, pageHub)
 	})
-	r.Run(":3000")
+	r.GET("/stop_all_monitors", func(context *gin.Context) {
+		router.StopAllMonitorsRoute(context,pageHub)
+	})
+	r.Run(":3001")
 }
 
 
