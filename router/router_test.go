@@ -64,6 +64,9 @@ func TestNewMonitor2(t *testing.T) {
 	req, _ := http.NewRequest("POST","/add_page_monitor",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	t.Log("the hell")
+	for i := range pageHub.GetMonitors(){
+		t.Log(i)
+	}
 	t.Log(pageHub.GetMonitors())
 	assert.Equal(t,400,rec.Code)
 	assert.Equal(t,0,len(pageHub.GetMonitors()))

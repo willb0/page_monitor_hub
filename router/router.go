@@ -10,6 +10,7 @@ import (
 )
 
 func SetupRouter(pageHub *hub.PageMonitorHub) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.POST("/add_page_monitor", func(context *gin.Context) {
 		StartMonitorRoute(context, pageHub)
@@ -54,7 +55,7 @@ func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
 
 func StartMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	pgj := models.PageRequestJson{}
-	if err := context.BindJSON(&pgj); err != nil {
+	if err := context.ShouldBindJSON(&pgj); err != nil {
 		context.AbortWithError(http.StatusBadRequest, err)
 		return true
 	}
