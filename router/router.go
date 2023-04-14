@@ -9,6 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SetupRouter(pageHub *hub.PageMonitorHub) *gin.Engine {
+	r := gin.Default()
+	r.POST("/add_page_monitor", func(context *gin.Context) {
+		StartMonitorRoute(context, pageHub)
+	})
+	r.GET("/get_all_monitors", func(context *gin.Context) {
+		AllMonitorsRoute(context, pageHub)
+	})
+	r.POST("/stop_page_monitor", func(context *gin.Context) {
+		StopMonitorRoute(context, pageHub)
+	})
+	r.GET("/stop_all_monitors", func(context *gin.Context) {
+		StopAllMonitorsRoute(context, pageHub)
+	})
+	return r
+}
+
 func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	pgj := models.PageRequestJson{}
 	if err := context.BindJSON(&pgj); err != nil {
@@ -17,10 +34,9 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	}
 	_,ok := pageHub.GetMonitors()[pgj.Url]
 	if !ok {
-		context.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"message": "Aborting a monitor that was never started"})
+		context.AbortWithStatusJSON(404,gin.H{"message": "Killing a monitor that was never started"})
 		return true
 	}
-	fmt.Println(pgj)
 	pageHub.RemoveMonitor(pgj.Url)
 	context.JSON(200,pgj)
 	return false
@@ -50,6 +66,10 @@ func StartMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 }
 
 func StopAllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
+	if len(pageHub.GetMonitors()) == 0{
+		context.AbortWithStatusJSON(404,gin.H{"message": "No monitors are currently running"})
+		return true
+	}
 	for key, _ := range pageHub.GetMonitors() {
 		pageHub.RemoveMonitor(key)
 	}
