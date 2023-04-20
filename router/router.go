@@ -41,6 +41,7 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	pageHub.RemoveMonitor(pgj.Url)
 	context.JSON(200,pgj)
 	return false
+	
 }
 
 func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
