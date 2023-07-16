@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"page_monitor_hub/pkg/hub"
+	"page_monitor_hub/router"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func TestAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	router := setupRouter(pageHub)
+	router := router.SetupRouter(pageHub)
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET","/get_all_monitors",nil)
