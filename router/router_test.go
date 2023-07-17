@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -13,9 +14,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+
 func TestAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET","/get_all_monitors",nil)
@@ -27,8 +31,9 @@ func TestAllMonitors1(t *testing.T) {
 
 func TestAllMonitors2(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
-
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	rec := httptest.NewRecorder()
 	pgm := hub.NewPageMonitorRequest("http://purdue.edu","purdue",10)
 	pageHub.AddMonitor(pgm)
@@ -41,7 +46,9 @@ func TestAllMonitors2(t *testing.T) {
 
 func TestNewMonitor1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	pgjson := models.PageRequestJson{
 		Url : "https://www.purdue.edu",
 		RedisChannel: "purdue",
@@ -57,7 +64,9 @@ func TestNewMonitor1(t *testing.T) {
 }
 func TestNewMonitor2(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	pgjson := gin.H{"message": "Killing a monitor that was never started"}
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
@@ -74,7 +83,9 @@ func TestNewMonitor2(t *testing.T) {
 
 func TestDeleteMonitor1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	pgjson := models.PageRequestJson{
 		Url : "https://www.purdue.edu",
 		RedisChannel: "purdue",
@@ -98,7 +109,9 @@ func TestDeleteMonitor1(t *testing.T) {
 
 func TestDeleteMonitor2(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	pgjson := models.PageRequestJson{
 		Url : "https://www.purdue.edu",
 		RedisChannel: "purdue",
@@ -112,7 +125,9 @@ func TestDeleteMonitor2(t *testing.T) {
 }
 func TestDeleteAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	pgjson := models.PageRequestJson{
 		Url : "https://www.purdue.edu",
 		RedisChannel: "purdue",
@@ -134,7 +149,9 @@ func TestDeleteAllMonitors1(t *testing.T) {
 
 func TestDeleteAllMonitors2(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	r := SetupRouter(pageHub)
+	db, err := sql.Open("sqlite3","page-monitor")
+	assert.Nil(t,err)
+	r := SetupRouter(pageHub,db)
 	rec := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET","/stop_all_monitors",nil)

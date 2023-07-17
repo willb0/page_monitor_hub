@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"page_monitor_hub/pkg/hub"
@@ -12,7 +14,11 @@ import (
 
 func TestAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
-	router := router.SetupRouter(pageHub)
+	db, err:= sql.Open("sqlite3","page-monitor-test")
+	if err != nil {
+		log.Fatal(err)
+	}
+	router := router.SetupRouter(pageHub,db)
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET","/get_all_monitors",nil)
