@@ -1,4 +1,4 @@
-name: Build and run on Vultr
+name: Build and run on Vultr VPS
 
 on:
   push:
