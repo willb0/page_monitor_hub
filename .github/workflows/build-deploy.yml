@@ -27,6 +27,6 @@ jobs:
           git status
           go build -v -o bin/
           fuser -k 3001/tcp
-          ./bin/page_monitor_hub >> logs.txt
+          ./bin/page_monitor_hub >> logs.txt & 
           
           
