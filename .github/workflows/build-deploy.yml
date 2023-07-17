@@ -26,6 +26,6 @@ jobs:
           git pull origin ${GITHUB_REF##*/}
           git status
           go build -v -o bin/
-          ./bin/page_monitor_hub
+          ./bin/page_monitor_hub >>| logs.txt
           
           
