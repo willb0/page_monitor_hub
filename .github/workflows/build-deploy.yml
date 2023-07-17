@@ -26,6 +26,5 @@ jobs:
           git pull origin ${GITHUB_REF##*/}
           git status
           go build -v -o bin/
-          fuser -k 3001/tcp
-          ./bin/page_monitor_hub &
+          
           
