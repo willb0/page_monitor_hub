@@ -21,7 +21,7 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: 22
         script: |
-          cd ~/page_monitor_hub
+          cd ~/page_monitor_hub_dev
           git checkout ${GITHUB_REF##*/}
           git pull origin ${GITHUB_REF##*/}
           git status
