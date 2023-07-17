@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  page-monitor-db:
+    image: sqlite:latest
+    volumes:
+      - ./data/page-monitor:/data
+    environment:
+      - SQLITE_DATABASE=page-monitor
+
+  page-monitor-test-db:
+    image: sqlite:latest
+    volumes:
+      - ./data/page-monitor-test:/data
+    environment:
+      - SQLITE_DATABASE=page-monitor-test
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
