@@ -25,7 +25,7 @@ jobs:
           git checkout ${GITHUB_REF##*/}
           git pull origin ${GITHUB_REF##*/}
           git status
-          go build . -o bin/
-          fuser -k tcp/3001
+          go build -v -o bin/
+          fuser -k 3001/tcp
           ./bin/page_monitor_hub &
           
