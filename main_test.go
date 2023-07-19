@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"page_monitor_hub/models"
 	"page_monitor_hub/pkg/hub"
 	"page_monitor_hub/router"
 	"testing"
@@ -12,6 +13,7 @@ import (
 
 func TestAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
+	models.ConnectTestDatabase()
 	router := router.SetupRouter(pageHub)
 
 	rec := httptest.NewRecorder()

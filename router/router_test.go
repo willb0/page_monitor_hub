@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"page_monitor_hub/models"
 	"page_monitor_hub/pkg/hub"
 	"testing"
@@ -13,6 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(m *testing.M) {
+    models.ConnectTestDatabase()
+    os.Exit(m.Run())
+}
 func TestAllMonitors1(t *testing.T) {
 	pageHub := hub.NewPageMonitorHub()
 	r := SetupRouter(pageHub)

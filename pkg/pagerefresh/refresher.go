@@ -64,7 +64,8 @@ func (p *PageMonitor) WatchForChangesAndNotify(ctx context.Context, r *redis.Cli
 			time.Sleep(time.Second * time.Duration(refresh_rate))
 			println("checking for changes on: ", p.page_url)
 			if p.CheckForChanges() {
-				println("it changed!")
+				println(p.redis_channel)
+				//println("it changed!")
 				r.Publish(ctx, p.redis_channel, p.GetHTML())
 			}
 		}

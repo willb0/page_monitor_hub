@@ -20,6 +20,7 @@ next will be frontend/deployment tweaks
 
 ### to run
 ```sh
+sh setup.sh
 go build -o bin
 ./bin/page_monitor_hub
 
@@ -35,7 +36,10 @@ endpoints:
         "refresh_rate":5,
     },
     /* GET */
-    "/get_all_monitors" : {
+    "/monitors/all" : {
+    },
+    /* GET */
+    "/monitors/all/delete" : {
     },
     /* POST */ 
     "/monitors/delete": {
