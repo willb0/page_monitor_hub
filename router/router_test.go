@@ -18,7 +18,7 @@ func TestAllMonitors1(t *testing.T) {
 	r := SetupRouter(pageHub)
 
 	rec := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET","/get_all_monitors",nil)
+	req, _ := http.NewRequest("GET","/monitors/all",nil)
 	r.ServeHTTP(rec,req)
 
 	assert.Equal(t,200,rec.Code)
@@ -30,10 +30,14 @@ func TestAllMonitors2(t *testing.T) {
 	r := SetupRouter(pageHub)
 
 	rec := httptest.NewRecorder()
-	pgm := hub.NewPageMonitorRequest("http://purdue.edu","purdue",10)
-	pageHub.AddMonitor(pgm)
-	body, _ := json.Marshal(pgm)
-	req, _ := http.NewRequest("GET","/get_all_monitors",bytes.NewReader(body))
+	pgj := models.PageRequestJson{
+		Url : "https://www.purdue.edu",
+		RedisChannel: "purdue",
+		RefreshRate: 10,
+	}
+	pageHub.AddMonitor(pgj.Url,pgj.RedisChannel,pgj.RefreshRate)
+	body, _ := json.Marshal(pgj)
+	req, _ := http.NewRequest("GET","/monitors/all",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	assert.Equal(t,200,rec.Code)
 	assert.Equal(t,1,len(pageHub.GetMonitors()))
@@ -49,10 +53,10 @@ func TestNewMonitor1(t *testing.T) {
 	}
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
-	req, _ := http.NewRequest("POST","/add_page_monitor",bytes.NewReader(body))
+	req, _ := http.NewRequest("POST","/monitors/create",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	//t.Log(req.Body)
-	assert.Equal(t,200,rec.Code)
+	assert.Equal(t,201,rec.Code)
 	assert.Equal(t,1,len(pageHub.GetMonitors()))
 }
 func TestNewMonitor2(t *testing.T) {
@@ -61,7 +65,7 @@ func TestNewMonitor2(t *testing.T) {
 	pgjson := gin.H{"message": "Killing a monitor that was never started"}
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
-	req, _ := http.NewRequest("POST","/add_page_monitor",bytes.NewReader(body))
+	req, _ := http.NewRequest("POST","/monitors/create",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	t.Log("the hell")
 	for i := range pageHub.GetMonitors(){
@@ -82,16 +86,18 @@ func TestDeleteMonitor1(t *testing.T) {
 	}
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
-	req, _ := http.NewRequest("POST","/add_page_monitor",bytes.NewReader(body))
+	req, _ := http.NewRequest("POST","/monitors/create",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	//t.Log(req.Body)
-	assert.Equal(t,200,rec.Code)
+	assert.Equal(t,201,rec.Code)
 	assert.Equal(t,1,len(pageHub.GetMonitors()))
 
-	req, _ = http.NewRequest("POST","/stop_page_monitor",bytes.NewReader(body))
+	rec = httptest.NewRecorder()
+	req, _ = http.NewRequest("POST","/monitors/delete",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
+	println(rec.Code)
 
-	assert.Equal(t,200,rec.Code)
+	assert.Equal(t,204,rec.Code)
 	assert.Equal(t,0,len(pageHub.GetMonitors()))
 
 }
@@ -106,7 +112,7 @@ func TestDeleteMonitor2(t *testing.T) {
 	}
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
-	req, _ := http.NewRequest("POST","/stop_page_monitor",bytes.NewReader(body))
+	req, _ := http.NewRequest("POST","/monitors/delete",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
 	assert.Equal(t,404,rec.Code)
 }
@@ -120,12 +126,13 @@ func TestDeleteAllMonitors1(t *testing.T) {
 	}	
 	rec := httptest.NewRecorder()
 	body, _ := json.Marshal(pgjson)
-	req, _ := http.NewRequest("POST","/add_page_monitor",bytes.NewReader(body))
+	req, _ := http.NewRequest("POST","/monitors/create",bytes.NewReader(body))
 	r.ServeHTTP(rec,req)
-	assert.Equal(t,200,rec.Code)
+	assert.Equal(t,201,rec.Code)
 	assert.Equal(t,1,len(pageHub.GetMonitors()))
 
-	req, _ = http.NewRequest("GET","/stop_all_monitors",nil)
+	rec = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET","/monitors/all/stop",nil)
 	r.ServeHTTP(rec,req)
 	//t.Log(req.Body)
 	assert.Equal(t,200,rec.Code)
@@ -137,7 +144,7 @@ func TestDeleteAllMonitors2(t *testing.T) {
 	r := SetupRouter(pageHub)
 	rec := httptest.NewRecorder()
 
-	req, _ := http.NewRequest("GET","/stop_all_monitors",nil)
+	req, _ := http.NewRequest("GET","/monitors/all/stop",nil)
 	r.ServeHTTP(rec,req)
 	//t.Log(req.Body)
 	assert.Equal(t,404,rec.Code)

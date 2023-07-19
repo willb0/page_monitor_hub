@@ -15,7 +15,7 @@ func TestAllMonitors1(t *testing.T) {
 	router := router.SetupRouter(pageHub)
 
 	rec := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET","/get_all_monitors",nil)
+	req, _ := http.NewRequest("GET","/monitors/all",nil)
 	router.ServeHTTP(rec,req)
 
 	assert.Equal(t,200,rec.Code)

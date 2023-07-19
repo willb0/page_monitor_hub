@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 	"page_monitor_hub/models"
 	"page_monitor_hub/pkg/hub"
@@ -12,22 +11,35 @@ import (
 func SetupRouter(pageHub *hub.PageMonitorHub) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	r.POST("/add_page_monitor", func(context *gin.Context) {
-		StartMonitorRoute(context, pageHub)
+	r.POST("/monitors/create", func(context *gin.Context) {
+		AddMonitorRoute(context, pageHub)
 	})
-	r.GET("/get_all_monitors", func(context *gin.Context) {
+	r.GET("/monitors/all", func(context *gin.Context) {
 		AllMonitorsRoute(context, pageHub)
 	})
-	r.POST("/stop_page_monitor", func(context *gin.Context) {
-		StopMonitorRoute(context, pageHub)
+	r.POST("/monitors/delete", func(context *gin.Context) {
+		DeleteMonitorRoute(context, pageHub)
 	})
-	r.GET("/stop_all_monitors", func(context *gin.Context) {
-		StopAllMonitorsRoute(context, pageHub)
+	r.GET("/monitors/all/stop", func(context *gin.Context) {
+		DeleteAllMonitorsRoute(context, pageHub)
 	})
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	  })
 	return r
 }
+func AddMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
+	pgj := models.PageRequestJson{}
+	if err := context.ShouldBindJSON(&pgj); err != nil {
+		context.AbortWithError(http.StatusBadRequest, err)
+		return true
+	}
+	pageHub.AddMonitor(pgj.Url,pgj.RedisChannel,pgj.RefreshRate)
+	context.JSON(201, &pgj)
+	return false
+}
 
-func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
+func DeleteMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	pgj := models.PageRequestJson{}
 	if err := context.BindJSON(&pgj); err != nil {
 		context.AbortWithError(http.StatusBadRequest, err)
@@ -39,7 +51,7 @@ func StopMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 		return true
 	}
 	pageHub.RemoveMonitor(pgj.Url)
-	context.JSON(200,pgj)
+	context.JSON(204,pgj)
 	return false
 	
 }
@@ -54,20 +66,9 @@ func AllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) {
 	context.JSON(200,keys)
 }
 
-func StartMonitorRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
-	pgj := models.PageRequestJson{}
-	if err := context.ShouldBindJSON(&pgj); err != nil {
-		context.AbortWithError(http.StatusBadRequest, err)
-		return true
-	}
-	fmt.Println(pgj)
-	pgr := hub.NewPageMonitorRequest(pgj.Url, pgj.RedisChannel, pgj.RefreshRate)
-	pageHub.AddMonitor(pgr)
-	context.JSON(200, &pgr)
-	return false
-}
 
-func StopAllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
+
+func DeleteAllMonitorsRoute(context *gin.Context, pageHub *hub.PageMonitorHub) bool {
 	if len(pageHub.GetMonitors()) == 0{
 		context.AbortWithStatusJSON(404,gin.H{"message": "No monitors are currently running"})
 		return true

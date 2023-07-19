@@ -29,7 +29,7 @@ endpoints:
 ```json
 {
     /* POST */
-    "/add_page_monitor" : {
+    "/monitors/create" : {
         "url":"https://purdue.edu",
         "redis_channel":"purdue_monitor",
         "refresh_rate":5,
@@ -38,7 +38,7 @@ endpoints:
     "/get_all_monitors" : {
     },
     /* POST */ 
-    "/stop_page_monitor": {
+    "/monitors/delete": {
         "url":"https://purdue.edu",
         "redis_channel":"purdue_monitor",
         "refresh_rate":5,

@@ -11,23 +11,20 @@ import (
 
 
 type PageMonitorHub struct {
-	channels map[string](*PageMonitorRequest)
-}
-type PageMonitorRequest struct {
-	url           string
-	testtomb      *tomb.Tomb
-	redis_channel string
-	refresher     pagerefresh.PageMonitor
+	channels map[string](tomb.Tomb)
 }
 
-func (p *PageMonitorRequest) GetUrl() string{
-	return p.url
+
+func NewPageMonitorHub() *PageMonitorHub {
+	return &PageMonitorHub{
+		channels: make(map[string](tomb.Tomb)),
+	}
 }
 
-func NewPageMonitorRequest(page_url string, redis_channel string, refresh_rate int) *PageMonitorRequest {
+func (p *PageMonitorHub) AddMonitor(url, redis_channel string, refresh_rate int) {
 	testTomb := tomb.Tomb{}
 	ctx, cancel := context.WithCancel(context.Background())
-	refresher := pagerefresh.NewPageMonitor(page_url, redis_channel)
+	refresher := pagerefresh.NewPageMonitor(url, redis_channel)
 	go func() {
 		defer testTomb.Done()
 		rdb := redis.NewClient(&redis.Options{
@@ -43,29 +40,14 @@ func NewPageMonitorRequest(page_url string, redis_channel string, refresh_rate i
 		println("Finished that mafucka")
 		cancel()
 	}()
-	return &PageMonitorRequest{
-		url:           page_url,
-		testtomb:      &testTomb,
-		redis_channel: redis_channel,
-		refresher:     *refresher,
-	}
-}
-
-func NewPageMonitorHub() *PageMonitorHub {
-	return &PageMonitorHub{
-		channels: make(map[string](*PageMonitorRequest)),
-	}
-}
-
-func (p *PageMonitorHub) AddMonitor(pg *PageMonitorRequest) {
-	p.channels[pg.url] = pg
+	p.channels[url] = testTomb
 }
 func (p *PageMonitorHub) RemoveMonitor(page_url string) {
-	println(p.channels[page_url])
-	p.channels[page_url].testtomb.Kill(fmt.Errorf("death from above"))
+	tomb := p.channels[page_url]
+	(&tomb).Kill(fmt.Errorf("death from above"))
 	delete(p.channels, page_url)
 }
 
-func (p *PageMonitorHub) GetMonitors() map[string](*PageMonitorRequest){
+func (p *PageMonitorHub) GetMonitors() map[string](tomb.Tomb){
 	return p.channels
 }

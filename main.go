@@ -10,6 +10,7 @@ import (
 func main() {
 	pageHub := hub.NewPageMonitorHub()
 	r := router.SetupRouter(pageHub)
+	println("listening on :3001")
 	r.Run(":3001")
 }
 
